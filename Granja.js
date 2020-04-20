@@ -122,6 +122,7 @@ class Cerdo extends Animales{
         if(this.sed){
         super.darBeber()
         this.hambre = true
+        this.registroAlimentoSinBebida = 0
         super.mostrarAnimal()
         }else console.log("El cerdo no tiene sed")
     }

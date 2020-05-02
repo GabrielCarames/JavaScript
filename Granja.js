@@ -122,7 +122,7 @@ class Cerdo extends Animales{
         if(this.sed){
         super.darBeber()
         this.hambre = true
-        this.registroAlimentoSinBebida = 0
+        registroAlimentoSinBebida = 0
         super.mostrarAnimal()
         }else console.log("El cerdo no tiene sed")
     }
@@ -151,14 +151,18 @@ class Gallina extends Animales{
     }
 }
 class Estaciones{
-    constructor(pesoSoporte = 500000){
-       // this.pesoSoporte = pesoSoporte;
+    constructor(){
+        this.pesoSoporte = 5000000
     }
     mostrarRecarga(){
-        console.log("La estación se ha recargado")
+        this.mostrarEstacion()
+        console.log("No hay insumos disponibles, recargando estación")
     }
     mostrarEstacion(){
         console.log(this)
+    }
+    ofrecerServicio(estacion, animal){
+        estacion.atenderAnimal(animal);
     }
 }
 class ComederoNormal extends Estaciones{
@@ -167,19 +171,18 @@ class ComederoNormal extends Estaciones{
         this.raciones = 4;
         this.gramos = 5000;
     }
-    alimentarAnimal(animal){
+    atenderAnimal(animal){
         if(animal.peso <= this.pesoSoporte){
-            animal.alimentar(this.gramos)
-            this.raciones -= 1
-            super.mostrarEstacion()
+            if(this.raciones <= 9){
+                super.mostrarRecarga()
+                super.mostrarEstacion()
+                this.raciones += 30
+            }else{
+                animal.alimentar(this.gramos)
+                this.raciones -= 1
+                super.mostrarEstacion()
+            }
         }else console.log("El peso del animal supera el peso del soporte o el animal no tiene hambre")
-    }
-    recargarEstacion(){
-        if(this.raciones <= 9){
-            this.raciones += 30
-            super.mostrarRecarga()
-            super.mostrarEstacion()
-        }else console.log("La estación aún cuenta con suficientes raciones")
     }
 }
 class ComederoInteligente extends Estaciones{
@@ -189,20 +192,19 @@ class ComederoInteligente extends Estaciones{
         this.cantidadAlimento = this.capacidadMaxima;
         this.alimento = 0;
     }
-    alimentarAnimal(animal){
-        this.alimento = animal.peso/100
-        if(this.cantidadAlimento >= this.alimento){
-            animal.alimentar(this.alimento)
-            this.cantidadAlimento -= this.alimento
-            super.mostrarEstacion()
-        }else console.log("No hay suficiente alimento para alimentar al animal")
-    }
-    recargarEstacion(){
+    atenderAnimal(animal){
         if(this.cantidadAlimento <= 14999){
-            this.cantidadAlimento = this.capacidadMaxima
             super.mostrarRecarga()
             super.mostrarEstacion()
-        }else console.log("La estación aún cuenta con suficiente alimento")
+            this.cantidadAlimento = this.capacidadMaxima
+        }else{
+            this.alimento = animal.peso/100
+            if(this.cantidadAlimento >= this.alimento){
+                animal.alimentar(this.alimento)
+                this.cantidadAlimento -= this.alimento
+                super.mostrarEstacion()
+            }else console.log("No hay suficiente alimento para alimentar al animal")
+        }
     }
 }
 class Bebedero extends Estaciones{
@@ -210,21 +212,18 @@ class Bebedero extends Estaciones{
         super(pesoSoporte);
         this.bebidas = 10;
     }
-    darBeberAnimal(animal){
-        if(this.bebidas >= 1){
+    atenderAnimal(animal){
+        if(this.bebidas <= 0){
+            super.mostrarRecarga()
+            super.mostrarEstacion()
+            this.bebidas += 20
+        }else{
             if(animal.sed){
                 animal.darBeber()
                 this.bebidas -= 1
                 super.mostrarEstacion()
             }else console.log("El animal no tiene sed")
-        }else console.log("No hay bebidas disponibles")
-    }
-    recargarBebedero(){
-        if(this.bebidas <= 0){
-            this.bebidas += 20
-            super.mostrarRecarga()
-            super.mostrarEstacion()
-        }else console.log("El bebedero aún cuenta con suficientes bebidas")
+        }
     }
 }
 class Vacunatorio extends Estaciones{
@@ -232,26 +231,24 @@ class Vacunatorio extends Estaciones{
         super(pesoSoporte);
         this.vacunas = 10;
     }
-    vacunarAnimal(animal){
-        if(this.vacunas >= 1){
+    atenderAnimal(animal){
+        if(this.vacunas <= 0){
+            super.mostrarRecarga()
+            super.mostrarEstacion()
+            this.vacunas += 50
+        }else{
             if(animal.vacunado == false){
                 animal.vacunar()
                 this.vacunas -= 1
                 super.mostrarEstacion()
             }else console.log("No conviene vacunar al animal")
-        }else console.log("No hay vacunas disponibles")
-    }
-    recargarVacunatorio(){
-        if(this.vacunas <= 0){
-            this.vacunas += 50
-            super.mostrarRecarga()
-            super.mostrarEstacion()
-        }else console.log("El vacunatorio aún cuenta con suficientes vacunas")
+        }
     }
 }
-var vacaChira = new Vaca(200000);
+var vacaChira = new Vaca(30);
 var cerdoManuelCabral = new Cerdo(30000);
 var gallinaSansa = new Gallina();
+var estaciondeservicio = new Estaciones();
 var comederoNormal = new ComederoNormal();
 var comederoInteligente = new ComederoInteligente();
 var bebedero = new Bebedero();
@@ -259,6 +256,7 @@ var vacunatorio = new Vacunatorio();
 
 vacaChira.mostrarAnimal()
 vacaChira.alimentar(5000)
+
 vacaChira.darBeber()
 vacaChira.vacunar()
 vacaChira.darcaminata()
@@ -275,26 +273,30 @@ gallinaSansa.darBeber()
 gallinaSansa.vacunar()
 gallinaSansa.mostrarAlimentosGallina()
 
-comederoNormal.mostrarEstacion()
-comederoNormal.alimentarAnimal(vacaChira)
-comederoNormal.alimentarAnimal(cerdoManuelCabral)
-comederoNormal.alimentarAnimal(gallinaSansa)
-comederoNormal.recargarEstacion()
+estaciondeservicio.ofrecerServicio(comederoNormal, vacaChira)
+estaciondeservicio.ofrecerServicio(comederoNormal, vacaChira)
+estaciondeservicio.ofrecerServicio(comederoNormal, cerdoManuelCabral)
+estaciondeservicio.ofrecerServicio(comederoNormal, cerdoManuelCabral)
+estaciondeservicio.ofrecerServicio(comederoNormal, gallinaSansa)
+estaciondeservicio.ofrecerServicio(comederoNormal, gallinaSansa)
 
-comederoInteligente.mostrarEstacion()
-comederoInteligente.alimentarAnimal(vacaChira)
-comederoInteligente.alimentarAnimal(cerdoManuelCabral)
-comederoInteligente.alimentarAnimal(gallinaSansa)
-comederoInteligente.recargarEstacion()
+estaciondeservicio.ofrecerServicio(comederoInteligente, vacaChira)
+estaciondeservicio.ofrecerServicio(comederoInteligente, vacaChira)
+estaciondeservicio.ofrecerServicio(comederoInteligente, cerdoManuelCabral)
+estaciondeservicio.ofrecerServicio(comederoInteligente, cerdoManuelCabral)
+estaciondeservicio.ofrecerServicio(comederoInteligente, gallinaSansa)
+estaciondeservicio.ofrecerServicio(comederoInteligente, gallinaSansa)
 
-bebedero.mostrarEstacion()
-bebedero.darBeberAnimal(vacaChira)
-bebedero.darBeberAnimal(cerdoManuelCabral)
-bebedero.darBeberAnimal(gallinaSansa)
-bebedero.recargarBebedero()
+estaciondeservicio.ofrecerServicio(bebedero, vacaChira)
+estaciondeservicio.ofrecerServicio(bebedero, vacaChira)
+estaciondeservicio.ofrecerServicio(bebedero, cerdoManuelCabral)
+estaciondeservicio.ofrecerServicio(bebedero, cerdoManuelCabral)
+estaciondeservicio.ofrecerServicio(bebedero, gallinaSansa)
+estaciondeservicio.ofrecerServicio(bebedero, gallinaSansa)
 
-vacunatorio.mostrarEstacion()
-vacunatorio.vacunarAnimal(vacaChira)
-vacunatorio.vacunarAnimal(cerdoManuelCabral)
-vacunatorio.vacunarAnimal(gallinaSansa)
-vacunatorio.recargarVacunatorio()
+estaciondeservicio.ofrecerServicio(vacunatorio, vacaChira)
+estaciondeservicio.ofrecerServicio(vacunatorio, vacaChira)
+estaciondeservicio.ofrecerServicio(vacunatorio, cerdoManuelCabral)
+estaciondeservicio.ofrecerServicio(vacunatorio, cerdoManuelCabral)
+estaciondeservicio.ofrecerServicio(vacunatorio, gallinaSansa)
+estaciondeservicio.ofrecerServicio(vacunatorio, gallinaSansa)
